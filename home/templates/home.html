@@ -1,0 +1,73 @@
+{% include 'header.html' %}
+    
+    <div class="container">
+        <div class="row" style="margin-top:50px ;">
+
+
+                <div class="input-field col s6 m6 16 ">
+                    <select multiple onchange="gethotels()" id="emenities">
+                        <option value="" disabled selected>Choose Your Option</option>
+                        {% for emenitie in emenities %}
+                        <option value=" {{emenitie.id}}">{{emenitie.name}}</option>
+                        {% endfor %}
+
+                    </select>
+                    <label>Select Emenities</label>
+                 </div>
+            
+                    
+                 <div class="col s6 m6 16">
+                        <label>Hotel Price</label>
+                        <p class="range-field" onchange="gethotels()">
+                            <input type="range" id="price" min="500" max="5000" value="5000">
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        <div class="container">
+           <div class="row" id="show_hotels_here"></div>
+        </div>
+
+    {% include 'footer.html'%}
+
+    <script>
+        var show_hotels_here= document.getElementById("show_hotels_here")
+
+        $(document).ready(function(){
+        $('select').formSelect();
+         });
+
+        function gethotels(){
+            var price = document.getElementById("price")
+            var instance = M.FormSelect.getInstance(document.getElementById('emenities'))
+            var emenities = ''
+            var html=''
+            if(instance){
+          emenities = (instance.getSelectedValues())
+      }
+
+      fetch(`/api/hotels?emenities= ${emenities}&price=${price.value}`)
+      .then(result => result.json())
+      .then(response => {
+
+        for(var i=0; i<response.length;i++){
+            html+=`<div class=" col s12 m6 14">
+                <div class="card hoverable">
+                    <div class="card-image">
+                        <img src="${response[i].hotel_image}" style="width:100%; height:40vh; ">
+                     <span class="card-title">${response[i].hotel_name}</span>
+                </div> 
+
+                <div class="card-content">
+                    Price- <span class="new badge">${(response[i].hotel_price)}</span>
+                    <p>${(response[i].hotel_description).substring(0, 100)}</p>
+                </div>
+                </div>
+                </div>`
+            } 
+            show_hotels_here.innerHTML = html
+        })
+    }
+
+    </script>
